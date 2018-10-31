@@ -1,0 +1,435 @@
+<?php
+$database = './usersdb.php';
+$success_page = '';
+$error_message = "";
+if (!file_exists($database))
+{
+   die('User database not found!');
+   exit;
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['form_name'] == 'signupform')
+{
+   $newusername = $_POST['username'];
+   $newemail = $_POST['email'];
+   $newpassword = $_POST['password'];
+   $confirmpassword = $_POST['confirmpassword'];
+   $newfullname = $_POST['fullname'];
+   $code = 'NA';
+   if ($newpassword != $confirmpassword)
+   {
+      $error_message = 'Password and Confirm Password are not the same!';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9_!@$]{1,50}$/", $newusername))
+   {
+      $error_message = 'Username is not valid, please check and try again!';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9_!@$]{1,50}$/", $newpassword))
+   {
+      $error_message = 'Password is not valid, please check and try again!';
+   }
+   else
+   if (!preg_match("/^[A-Za-z0-9_!@$.' &]{1,50}$/", $newfullname))
+   {
+      $error_message = 'Fullname is not valid, please check and try again!';
+   }
+   else
+   if (!preg_match("/^.+@.+\..+$/", $newemail))
+   {
+      $error_message = 'Email is not a valid email address. Please check and try again.';
+   }
+   $items = file($database, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+   foreach($items as $line)
+   {
+      list($username, $password, $email, $fullname) = explode('|', trim($line));
+      if ($newusername == $username)
+      {
+         $error_message = 'Username already used. Please select another username.';
+         break;
+      }
+   }
+   if (empty($error_message))
+   {
+      $file = fopen($database, 'a');
+      fwrite($file, $newusername);
+      fwrite($file, '|');
+      fwrite($file, md5($newpassword));
+      fwrite($file, '|');
+      fwrite($file, $newemail);
+      fwrite($file, '|');
+      fwrite($file, $newfullname);
+      fwrite($file, '|1|');
+      fwrite($file, $code);
+      fwrite($file, "\r\n");
+      fclose($file);
+      $subject = 'Your new account';
+      $message = 'A new account has been setup.';
+      $message .= "\r\nUsername: ";
+      $message .= $newusername;
+      $message .= "\r\nPassword: ";
+      $message .= $newpassword;
+      $message .= "\r\n";
+      $header  = "From: webmaster@yourwebsite.com"."\r\n";
+      $header .= "Reply-To: webmaster@yourwebsite.com"."\r\n";
+      $header .= "MIME-Version: 1.0"."\r\n";
+      $header .= "Content-Type: text/plain; charset=utf-8"."\r\n";
+      $header .= "Content-Transfer-Encoding: 8bit"."\r\n";
+      $header .= "X-Mailer: PHP v".phpversion();
+      mail($newemail, $subject, $message, $header);
+      header('Location: '.$success_page);
+      exit;
+   }
+}
+?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Untitled Page</title>
+<meta name="generator" content="WYSIWYG Web Builder 9 - http://www.wysiwygwebbuilder.com">
+<style type="text/css">
+body
+{
+   margin: 0;
+   padding: 0;
+   background-color: #FFFFFF;
+   color: #000000;
+}
+</style>
+<style type="text/css">
+a
+{
+   color: #0000FF;
+   text-decoration: underline;
+}
+a:visited
+{
+   color: #800080;
+}
+a:active
+{
+   color: #FF0000;
+}
+a:hover
+{
+   color: #0000FF;
+   text-decoration: underline;
+}
+</style>
+<style type="text/css">
+#Image1
+{
+   border: 0px #000000 solid;
+}
+#wb_Text1 
+{
+   background-color: transparent;
+   border: 0px #000000 solid;
+   padding: 0;
+   text-align: left;
+}
+#wb_Text1 div
+{
+   text-align: left;
+}
+#Image5
+{
+   border: 0px #000000 solid;
+}
+#Image7
+{
+   border: 0px #000000 solid;
+}
+#Image10
+{
+   border: 0px #000000 solid;
+}
+#Image11
+{
+   border: 0px #000000 solid;
+}
+#Image8
+{
+   border: 0px #000000 solid;
+}
+#wb_TextMenu1
+{
+   background-color: #000000;
+   color :#000000;
+   font-family: 'Arial Black';
+   font-size: 48px;
+}
+#wb_TextMenu1 span
+{
+   display: block;
+   margin: 0px 0px 4px 0px;
+   line-height: 68px;
+}
+.signupform_table
+{
+   background-color: #EEEEEE;
+   border-color:#878787;
+   border-width:1px;
+   border-style: solid;
+   color: #000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: right;
+   border-spacing: 4px;
+}
+.signupform_header
+{
+   background-color: #878787;
+   color: #FFFFFF;
+   text-align: center;
+}
+.signupform_text
+{
+   background-color: #FFFFFF;
+   border-color: #878787;
+   border-width: 1px;
+   border-style: solid;
+   color: #000000;
+   font-family: Arial;
+   font-size: 13px;
+}
+.signupform_button
+{
+   background-color: #FFFFFF;
+   border-color: #878787;
+   border-width: 1px;
+   border-style: solid;
+   color: #000000;
+   font-family: Arial;
+   font-size: 13px;
+}
+#SiteSearch1_keyword
+{
+   border: 1px #A9A9A9 solid;
+   background-color: #FFFFFF;
+   color :#000000;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+   vertical-align: middle;
+}
+#SiteSearch1_label
+{
+   color: #A9A9A9;
+   cursor: text;
+   font-family: Arial;
+   font-size: 13px;
+   text-align: left;
+}
+#Button1
+{
+   border: 1px #A9A9A9 solid;
+   background-color: #F0F0F0;
+   color: #A9A9A9;
+   font-family: Arial;
+   font-size: 13px;
+}
+</style>
+<script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+<script type="text/javascript" src="./searchindex.js"></script>
+<script type="text/javascript">
+var features = 'toolbar=no,menubar=no,location=no,scrollbars=yes,resizable=yes,status=no,left=,top=,width=,height=';
+var searchDatabase = new SearchDatabase();
+var searchResults_length = 0;
+var searchResults = new Object();
+function searchPage(features)
+{
+   var element = document.getElementById('SiteSearch1_keyword');
+   if (element.value.length != 0 || element.value != " ")
+   {
+      var value = unescape(element.value);
+      var keywords = value.split(" ");
+      searchResults_length = 0;
+      for (var i=0; i<database_length; i++)
+      {
+         var matches = 0;
+         var words = searchDatabase[i].title + " " + searchDatabase[i].description + " " + searchDatabase[i].keywords;
+         for (var j = 0; j < keywords.length; j++)
+         {
+            var pattern = new RegExp(keywords[j], "i");
+            var result = words.search(pattern);
+            if (result >= 0)
+            {
+               matches++;
+            }
+            else
+            {
+               matches = 0;
+            }
+         }
+         if (matches == keywords.length)
+         {
+            searchResults[searchResults_length++] = searchDatabase[i];
+         }
+      }
+      var wndResults = window.open('about:blank', '', features);
+      setTimeout(function()
+      {
+         var results = '';
+         var html = '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>Search results<\/title><'+'style type="text/css">.highlight { color: #000000; background-color: #FFFFFF}<\/style><\/head>';
+         html = html + '<body style="background-color:#FFFFFF;margin:0;padding:2px 2px 2px 2px;">';
+         html = html + '<span style="font-family:Arial;font-size:21px;color:#FFFFF0">';
+         for (var n=0; n<searchResults_length; n++)
+         {
+            var page_keywords = searchResults[n].keywords;
+            for (var k = 0; k < keywords.length; k++)
+            {
+               keywords[k] = keywords[k].replace('*', '');
+               var rgxp = new RegExp(keywords[k], 'g');
+               var repl = '<span class="highlight">' + keywords[k] + '</span>';
+               page_keywords = page_keywords.replace(rgxp, repl);
+            }
+            results = results + '<strong><a style="color:#0000FF" target="_parent" href="'+searchResults[n].url+'">'+searchResults[n].title +'<\/a><\/strong><br>Keywords: ' + page_keywords +'<br><br>\n';
+         }
+         if (searchResults_length == 0)
+         {
+            results = 'No results';
+         }
+         else
+         {
+            html = html + searchResults_length;
+            html = html + ' result(s) found for search term: ';
+            html = html + value;
+            html = html + '<br><br>';
+         }
+         html = html + results;
+         html = html + '<\/span>';
+         html = html + '<\/body><\/html>';
+         wndResults.document.write(html);
+     },100);
+   }
+   return false;
+}
+function searchParseURL()
+{
+   var url = window.location.href;
+   if (url.indexOf('?') > 0)
+   {
+      var terms = '';
+      var params = url.split('?');
+      var values = params[1].split('&');
+      for (var i=0;i<values.length;i++)
+      {
+         var param = values[i].split('=');
+         if (param[0] == 'q')
+         {
+            terms = unescape(param[1]);
+            break;
+         }
+      }
+      if (terms != '')
+      {
+         var element = document.getElementById('SiteSearch1_keyword');
+         element.value = terms;
+         searchPage('');
+      }
+   }
+}
+</script>
+<script type="text/javascript">
+$(document).ready(function()
+{
+   searchParseURL();
+   var $search = $('#SiteSearch1_form');
+   var $searchInput = $search.find('input');
+   var $searchLabel = $search.find('label');
+   if ($searchInput.val())
+   {
+      $searchLabel.hide();
+   }
+   $searchInput.focus(function()
+   {
+      $searchLabel.hide();
+   }).blur(function()
+   {
+      if (this.value == '')
+      {
+         $searchLabel.show();
+      }
+   });
+   $searchLabel.click(function()
+   {
+      $searchInput.trigger('focus');
+   });
+});
+</script>
+</head>
+<body>
+<div id="wb_Image1" style="position:absolute;left:0px;top:4px;width:2340px;height:1972px;z-index:0;">
+<img src="images/t22eibdrSt0wU.jpg" id="Image1" alt="" style="width:2340px;height:1972px;"></div>
+<div id="wb_TextArt1" style="position:absolute;left:173px;top:59px;width:1718px;height:233px;z-index:1;">
+<img src="images/img0004.png" id="TextArt1" alt="&#1063;&#1086;&#1088;&#1085;&#1080;&#1081; &#1050;&#1072;&#1079;&#1077;&#1083;&#1066; - &#1048;&#1079;&#1091;&#1074;&#1077;&#1088;&#1066; " title="&#1063;&#1086;&#1088;&#1085;&#1080;&#1081; &#1050;&#1072;&#1079;&#1077;&#1083;&#1066; - &#1048;&#1079;&#1091;&#1074;&#1077;&#1088;&#1066; " style="border-width:0;width:1718px;height:233px;"></div>
+<div id="wb_Text1" style="position:absolute;left:499px;top:302px;width:387px;height:16px;z-index:2;text-align:left;">
+<span style="color:#000000;font-family:Arial;font-size:13px;">Double click to edit</span></div>
+<div id="wb_TextArt2" style="position:absolute;left:383px;top:311px;width:1327px;height:143px;z-index:3;">
+<img src="images/img0005.png" id="TextArt2" alt="&#1058;&#1088;&#1091;&#1066; &#1072;&#1094;&#1094;&#1082;&#1080;&#1081; &#1050;&#1086;&#1079;&#1083;&#1086;&#1084;&#1077;&#1090;&#1072;&#1083;&#1083;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1081; &#1060;&#1086;&#1088;&#1091;&#1084;&#1066;" title="&#1058;&#1088;&#1091;&#1066; &#1072;&#1094;&#1094;&#1082;&#1080;&#1081; &#1050;&#1086;&#1079;&#1083;&#1086;&#1084;&#1077;&#1090;&#1072;&#1083;&#1083;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1081; &#1060;&#1086;&#1088;&#1091;&#1084;&#1066;" style="border-width:0;width:1327px;height:143px;"></div>
+<div id="wb_Image5" style="position:absolute;left:181px;top:287px;width:200px;height:199px;z-index:4;">
+<img src="images/pentagram-gif-8.gif" id="Image5" alt="" style="width:200px;height:199px;"></div>
+<div id="wb_Image7" style="position:absolute;left:1703px;top:298px;width:200px;height:199px;z-index:5;">
+<img src="images/pentagram-gif-8.gif" id="Image7" alt="" style="width:200px;height:199px;"></div>
+<div id="wb_Image10" style="position:absolute;left:0px;top:1689px;width:2340px;height:286px;z-index:6;">
+<img src="images/4Tb6y84qc.gif" id="Image10" alt="" style="width:2340px;height:286px;"></div>
+<div id="wb_Image11" style="position:absolute;left:3px;top:16px;width:176px;height:176px;z-index:7;">
+<img src="images/rock_and_roll-7021.jpg" id="Image11" alt="" style="width:176px;height:176px;"></div>
+<div id="wb_Image8" style="position:absolute;left:1870px;top:26px;width:176px;height:176px;z-index:8;">
+<img src="images/img0006.jpg" id="Image8" alt="" style="width:176px;height:176px;"></div>
+<div id="wb_TextMenu1" style="position:absolute;left:0px;top:938px;width:606px;height:752px;z-index:9;">
+<span>[<a href="./index.html">&#1053;&#1086;&#1074;&#1086;&#1089;&#1090;&#1080;</a>]</span>
+<span>[<a href="">&#1054; &#1085;&#1072;&#1089; &#1076;&#1086;&#1083;&#1073;&#1086;&#1077;&#1073;&#1072;&#1093;</a>]</span>
+<span>[<a href="">&#1053;&#1072;&#1096;&#1080; &#1086;&#1083;&#1100;&#1073;&#1091;&#1084;&#1099; </a>]</span>
+<span>[<a href="">&#1053;&#1072;&#1096;&#1072; &#1080;&#1075;&#1088;&#1072;</a>]</span>
+<span>[<a href="http://vk.com/hell_goat666" target="_blank">&#1053;&#1072;&#1096;&#1072; &#1075;&#1088;&#1091;&#1087;&#1087;&#1072; &#1042;&#1050;</a>]</span>
+<span>[<a href="">&#1060;&#1086;&#1088;&#1091;&#1084;&#1066;</a>]</span>
+</div>
+<iframe name="loginadmin" style="position:absolute;border-color:#878787;border-width:1px;border-style:solid;left:45px;top:486px;width:318px;height:100px;z-index:10;" src="./loginadmin.php" frameborder="0"></iframe>
+<div id="wb_Signup1" style="position:absolute;left:55px;top:602px;width:275px;height:202px;text-align:right;z-index:11;">
+<form name="signupform" method="post" action="<?php echo basename(__FILE__); ?>" id="signupform">
+<input type="hidden" name="form_name" value="signupform">
+<table class="signupform_table" style="width:275px;height:202px;">
+<tr>
+   <td class="signupform_header" colspan="2" style="height:20px;">Sign up for a new account</td>
+</tr>
+<tr>
+   <td style="height:20px">Full Name:</td>
+   <td style="text-align:left"><input class="signupform_text" name="fullname" type="text" id="fullname" style="width:150px;height:18px;"></td>
+</tr>
+<tr>
+   <td style="height:20px">User Name:</td>
+   <td style="text-align:left"><input class="signupform_text" name="username" type="text" id="username" style="width:150px;height:18px;"></td>
+</tr>
+<tr>
+   <td style="height:20px;">Password:</td>
+   <td style="text-align:left"><input class="signupform_text" name="password" type="password" id="password" style="width:150px;height:18px;"></td>
+</tr>
+<tr>
+   <td style="height:20px">Confirm Password:</td>
+   <td style="text-align:left"><input class="signupform_text" name="confirmpassword" type="password" id="confirmpassword" style="width:150px;height:18px;"></td>
+</tr>
+<tr>
+   <td style="height:20px">E-mail:</td>
+   <td style="text-align:left"><input class="signupform_text" name="email" type="text" id="email" style="width:150px;height:18px;"></td>
+</tr>
+<tr>
+   <td colspan="2"><?php echo $error_message; ?></td>
+</tr>
+<tr>
+   <td>&nbsp;</td><td style="text-align:left;vertical-align:bottom"><input class="signupform_button" type="submit" name="signup" value="Create User" id="signup" style="width:90px;height:20px;"></td>
+</tr>
+</table>
+</form>
+</div>
+<div id="wb_SiteSearch1" style="position:absolute;left:706px;top:546px;width:147px;height:20px;z-index:12;">
+<form action="" name="SiteSearch1_form" id="SiteSearch1_form" accept-charset="UTF-8" onsubmit="return searchPage(features)">
+<input type="text" id="SiteSearch1_keyword" style="position:absolute;left:0px;top:0px;width:147px;height:20px;line-height:20px;;" name="SiteSearch1" value="">
+<label id="SiteSearch1_label" style="position:absolute;left:1px;top:3px;" for="SiteSearch1_keyword">Поиск Блеать</label>
+</form>
+</div>
+<input type="button" id="Button1" onclick="searchPage();return false;" name="Search" value="Search" style="position:absolute;left:859px;top:546px;width:154px;height:59px;z-index:13;">
+</body>
+</html>
